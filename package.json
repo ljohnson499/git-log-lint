@@ -1,0 +1,17 @@
+{
+  "name": "git-log-lint",
+  "version": "0.1.0",
+  "description": "Validating parser and pretty printer for git log output",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "git-log-lint": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js"
+  }
+}
