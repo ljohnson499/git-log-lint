@@ -62,6 +62,18 @@ tsc
 node dist/cli.js history.log
 ```
 
+## Testing
+
+Tests use `node:test` and `node:assert`, both in the standard library - no test
+runner dependency. They compile alongside the rest of the source, so run them
+with:
+
+```sh
+npm test
+```
+
+which is shorthand for `tsc && node --test dist/*.test.js`.
+
 ## Format
 
 Each record has exactly seven fields, in this order: full hash, abbreviated
@@ -71,5 +83,6 @@ the root commit), subject line.
 
 ## Status
 
-Early skeleton. Parses and pretty-prints; no tests yet, see the roadmap in
-the commit history for what's planned next.
+Early skeleton. Parses and pretty-prints, with unit tests covering the
+parser's validation rules. See the roadmap in the commit history for what's
+planned next.
