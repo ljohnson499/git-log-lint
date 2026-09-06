@@ -1,5 +1,18 @@
 import type { CommitRecord } from './parser.js'
 
+// Date isn't JSON-serializable in the shape we want (JSON.stringify would
+// produce the same ISO string anyway, but being explicit keeps the output
+// format a documented contract rather than an accident of Date's toJSON).
+type JsonCommitRecord = Omit<CommitRecord, 'date'> & { date: string }
+
+export function formatCommitsJson(commits: CommitRecord[]): string {
+  const records: JsonCommitRecord[] = commits.map(commit => ({
+    ...commit,
+    date: commit.date.toISOString(),
+  }))
+  return JSON.stringify(records, null, 2)
+}
+
 function formatDate(date: Date): string {
   return date.toISOString().replace('T', ' ').slice(0, 16) + 'Z'
 }

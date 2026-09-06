@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs'
 import { parseLog, ParseError } from './parser.js'
-import { formatCommits } from './printer.js'
+import { formatCommits, formatCommitsJson } from './printer.js'
 
 async function readStdin(): Promise<string> {
   const chunks: Buffer[] = []
@@ -22,12 +22,16 @@ async function readInput(paths: string[]): Promise<string> {
 }
 
 async function main(): Promise<void> {
-  const paths = process.argv.slice(2)
-  const input = await readInput(paths)
+  const args = process.argv.slice(2)
+  const jsonIndex = args.indexOf('--json')
+  const json = jsonIndex !== -1
+  if (json) args.splice(jsonIndex, 1)
+
+  const input = await readInput(args)
 
   try {
     const commits = parseLog(input)
-    process.stdout.write(formatCommits(commits) + '\n')
+    process.stdout.write((json ? formatCommitsJson(commits) : formatCommits(commits)) + '\n')
   } catch (err) {
     if (err instanceof ParseError) {
       process.stderr.write(`git-log-lint: ${err.message}\n`)

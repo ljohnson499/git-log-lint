@@ -53,6 +53,27 @@ looking but wrong:
 git-log-lint: record 3: "not-a-hash" is not a 40-character lowercase hex commit hash
 ```
 
+Pass `--json` to get the parsed records as JSON instead of the pretty-printed
+text - useful for piping into another script:
+
+```sh
+node dist/cli.js --json history.log
+```
+
+```json
+[
+  {
+    "hash": "a1b2c3d4e5f6789012345678901234567890abcd",
+    "abbrevHash": "a1b2c3d",
+    "authorName": "Jane Doe",
+    "authorEmail": "jane@example.com",
+    "date": "2026-03-01T10:22:00.000Z",
+    "parents": [],
+    "subject": "fix off-by-one in wrap()"
+  }
+]
+```
+
 ## Building
 
 There's no build step checked in. With TypeScript installed:
