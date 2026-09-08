@@ -53,6 +53,11 @@ looking but wrong:
 git-log-lint: record 3: "not-a-hash" is not a 40-character lowercase hex commit hash
 ```
 
+Pretty-printed output is colorized automatically when stdout is a terminal
+(hash in yellow, author in cyan, date dimmed, merge note in magenta) and
+plain when piped to a file or another program. Set `NO_COLOR` to force plain
+output even in a terminal.
+
 Pass `--json` to get the parsed records as JSON instead of the pretty-printed
 text - useful for piping into another script:
 

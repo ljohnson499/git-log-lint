@@ -28,10 +28,11 @@ async function main(): Promise<void> {
   if (json) args.splice(jsonIndex, 1)
 
   const input = await readInput(args)
+  const color = Boolean(process.stdout.isTTY) && !process.env.NO_COLOR
 
   try {
     const commits = parseLog(input)
-    process.stdout.write((json ? formatCommitsJson(commits) : formatCommits(commits)) + '\n')
+    process.stdout.write((json ? formatCommitsJson(commits) : formatCommits(commits, { color })) + '\n')
   } catch (err) {
     if (err instanceof ParseError) {
       process.stderr.write(`git-log-lint: ${err.message}\n`)

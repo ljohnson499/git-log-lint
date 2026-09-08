@@ -35,8 +35,29 @@ function wrap(text: string, width: number): string[] {
   return lines
 }
 
-export function formatCommits(commits: CommitRecord[], width = 72): string {
+const ANSI = {
+  yellow: '\x1b[33m',
+  cyan: '\x1b[36m',
+  dim: '\x1b[2m',
+  magenta: '\x1b[35m',
+  reset: '\x1b[0m',
+}
+
+// Wrapping happens on the plain text, before color codes are added, so line
+// widths aren't thrown off by escape sequences that print with zero width.
+function paint(code: string, text: string, color: boolean): string {
+  return color ? `${code}${text}${ANSI.reset}` : text
+}
+
+export interface FormatCommitsOptions {
+  width?: number
+  color?: boolean
+}
+
+export function formatCommits(commits: CommitRecord[], options: FormatCommitsOptions = {}): string {
   if (commits.length === 0) return '(no commits)'
+
+  const { width = 72, color = false } = options
 
   return commits
     .map(commit => {
@@ -44,11 +65,15 @@ export function formatCommits(commits: CommitRecord[], width = 72): string {
       const indent = ' '.repeat(prefix.length)
       const subjectLines = wrap(commit.subject, Math.max(width - prefix.length, 20))
       const subjectBlock = subjectLines
-        .map((line, i) => (i === 0 ? prefix + line : indent + line))
+        .map((line, i) => (i === 0 ? paint(ANSI.yellow, commit.abbrevHash, color) + '  ' + line : indent + line))
         .join('\n')
 
-      const mergeNote = commit.parents.length > 1 ? `  (merge of ${commit.parents.length})` : ''
-      const metaLine = `${indent}${commit.authorName} <${commit.authorEmail}>  ${formatDate(commit.date)}${mergeNote}`
+      const mergeNote = commit.parents.length > 1
+        ? paint(ANSI.magenta, `  (merge of ${commit.parents.length})`, color)
+        : ''
+      const author = paint(ANSI.cyan, `${commit.authorName} <${commit.authorEmail}>`, color)
+      const date = paint(ANSI.dim, formatDate(commit.date), color)
+      const metaLine = `${indent}${author}  ${date}${mergeNote}`
 
       return `${subjectBlock}\n${metaLine}`
     })

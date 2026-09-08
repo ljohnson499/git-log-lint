@@ -30,6 +30,22 @@ test('formatCommits includes a merge note only for multiple parents', () => {
   assert.match(merge, /\(merge of 2\)/)
 })
 
+test('formatCommits emits no escape codes by default', () => {
+  const output = formatCommits([commit()])
+  assert.doesNotMatch(output, /\x1b\[/)
+})
+
+test('formatCommits wraps fields in ANSI codes when color is requested', () => {
+  const output = formatCommits([commit()], { color: true })
+  assert.match(output, /\x1b\[33ma1b2c3d\x1b\[0m/)
+  assert.match(output, /\x1b\[36mJane Doe <jane@example.com>\x1b\[0m/)
+})
+
+test('formatCommits colorizes the merge note when present', () => {
+  const output = formatCommits([commit({ parents: [HASH.slice(0, 8), HASH.slice(0, 8)] })], { color: true })
+  assert.match(output, /\x1b\[35m {2}\(merge of 2\)\x1b\[0m/)
+})
+
 test('formatCommitsJson round-trips commit data through JSON', () => {
   const [parsed] = JSON.parse(formatCommitsJson([commit()])) as Array<Record<string, unknown>>
   assert.equal(parsed?.hash, HASH)
