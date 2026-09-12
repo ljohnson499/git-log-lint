@@ -1,4 +1,5 @@
 import type { CommitRecord } from './parser.js'
+import { buildGraphRows } from './graph.js'
 
 // Date isn't JSON-serializable in the shape we want (JSON.stringify would
 // produce the same ISO string anyway, but being explicit keeps the output
@@ -52,20 +53,29 @@ function paint(code: string, text: string, color: boolean): string {
 export interface FormatCommitsOptions {
   width?: number
   color?: boolean
+  graph?: boolean
 }
 
 export function formatCommits(commits: CommitRecord[], options: FormatCommitsOptions = {}): string {
   if (commits.length === 0) return '(no commits)'
 
-  const { width = 72, color = false } = options
+  const { width = 72, color = false, graph = false } = options
+  const graphRows = graph ? buildGraphRows(commits) : null
 
   return commits
-    .map(commit => {
-      const prefix = `${commit.abbrevHash}  `
-      const indent = ' '.repeat(prefix.length)
-      const subjectLines = wrap(commit.subject, Math.max(width - prefix.length, 20))
+    .map((commit, i) => {
+      const row = graphRows?.[i]
+      const graphHead = row ? `${row.head} ` : ''
+      const graphCont = row ? `${row.continuation} ` : ''
+      const hashIndent = ' '.repeat(commit.abbrevHash.length + 2)
+
+      const subjectLines = wrap(commit.subject, Math.max(width - graphHead.length - hashIndent.length, 20))
       const subjectBlock = subjectLines
-        .map((line, i) => (i === 0 ? paint(ANSI.yellow, commit.abbrevHash, color) + '  ' + line : indent + line))
+        .map((line, j) =>
+          j === 0
+            ? graphHead + paint(ANSI.yellow, commit.abbrevHash, color) + '  ' + line
+            : graphCont + hashIndent + line
+        )
         .join('\n')
 
       const mergeNote = commit.parents.length > 1
@@ -73,9 +83,10 @@ export function formatCommits(commits: CommitRecord[], options: FormatCommitsOpt
         : ''
       const author = paint(ANSI.cyan, `${commit.authorName} <${commit.authorEmail}>`, color)
       const date = paint(ANSI.dim, formatDate(commit.date), color)
-      const metaLine = `${indent}${author}  ${date}${mergeNote}`
+      const metaLine = `${graphCont}${hashIndent}${author}  ${date}${mergeNote}`
+      const branchOutLine = row?.branchOut ? `\n${row.branchOut}` : ''
 
-      return `${subjectBlock}\n${metaLine}`
+      return `${subjectBlock}\n${metaLine}${branchOutLine}`
     })
     .join('\n\n')
 }

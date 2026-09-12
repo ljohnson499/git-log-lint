@@ -58,6 +58,18 @@ Pretty-printed output is colorized automatically when stdout is a terminal
 plain when piped to a file or another program. Set `NO_COLOR` to force plain
 output even in a terminal.
 
+Pass `--graph` to prefix each commit with an ASCII lane column, the way
+`git log --graph` does, so merges and the branches feeding into them are
+visible instead of just the `(merge of N)` note:
+
+```
+* a1b2c3d  fix off-by-one in wrap()
+|          Jane Doe <jane@example.com>  2026-03-01 10:22Z
+*   9f8e7d6  merge branch 'feature/parser'
+| \         Jane Doe <jane@example.com>  2026-03-02 09:05Z  (merge of 2)
+* | 1234abc  tighten wrap() edge cases
+```
+
 Pass `--json` to get the parsed records as JSON instead of the pretty-printed
 text - useful for piping into another script:
 

@@ -46,6 +46,29 @@ test('formatCommits colorizes the merge note when present', () => {
   assert.match(output, /\x1b\[35m {2}\(merge of 2\)\x1b\[0m/)
 })
 
+test('formatCommits omits graph columns unless the graph option is set', () => {
+  const output = formatCommits([commit()])
+  assert.equal(output.startsWith(commit().abbrevHash), true)
+})
+
+test('formatCommits prefixes each line with a single-lane graph column when requested', () => {
+  const output = formatCommits([commit()], { graph: true })
+  const lines = output.split('\n')
+  assert.equal(lines[0]?.startsWith('* '), true)
+  assert.equal(lines[1]?.startsWith('| '), true)
+})
+
+test('formatCommits draws a branch line under a merge commit that opens a new lane', () => {
+  const hashB1 = 'b'.repeat(40)
+  const hashB2 = 'c'.repeat(40)
+  const output = formatCommits(
+    [commit({ parents: [hashB1.slice(0, 8), hashB2.slice(0, 8)] }), commit({ hash: hashB1, abbrevHash: hashB1.slice(0, 7), parents: [] })],
+    { graph: true }
+  )
+  const lines = output.split('\n')
+  assert.equal(lines[2], '| \\')
+})
+
 test('formatCommitsJson round-trips commit data through JSON', () => {
   const [parsed] = JSON.parse(formatCommitsJson([commit()])) as Array<Record<string, unknown>>
   assert.equal(parsed?.hash, HASH)

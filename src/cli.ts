@@ -26,13 +26,16 @@ async function main(): Promise<void> {
   const jsonIndex = args.indexOf('--json')
   const json = jsonIndex !== -1
   if (json) args.splice(jsonIndex, 1)
+  const graphIndex = args.indexOf('--graph')
+  const graph = graphIndex !== -1
+  if (graph) args.splice(graphIndex, 1)
 
   const input = await readInput(args)
   const color = Boolean(process.stdout.isTTY) && !process.env.NO_COLOR
 
   try {
     const commits = parseLog(input)
-    process.stdout.write((json ? formatCommitsJson(commits) : formatCommits(commits, { color })) + '\n')
+    process.stdout.write((json ? formatCommitsJson(commits) : formatCommits(commits, { color, graph })) + '\n')
   } catch (err) {
     if (err instanceof ParseError) {
       process.stderr.write(`git-log-lint: ${err.message}\n`)
